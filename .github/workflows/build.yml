@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 安装Java17（安卓编译必须）
+      - name: 安装Java17
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -17,22 +17,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
-      - name: 初始化项目+完整安装Capacitor（含cli命令行）
+      - name: 初始化并安装依赖（自动生成lock文件）
         run: |
           npm init -y
-          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
+          npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "智思图" zhisitu.app --web-dir=.
           npx cap add android
-          npx cap sync android
+          npx cap sync
 
-      - name: 编译Release版APK
+      - name: 编译APK
         run: |
           cd android
           ./gradlew assembleRelease
 
-      - name: 上传APK安装包
+      - name: 上传APK
         uses: actions/upload-artifact@v4
         with:
           name: 智思图-APK安装包
