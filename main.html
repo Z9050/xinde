@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>智思图 - 思维导图</title>
+  <script src="https://cdn.jsdelivr.net/npm/simple-mind-map@0.9.13/dist/simpleMindMap.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{width:100vw;height:100vh;overflow:hidden;font-family:Microsoft Yahei;transition:0.3s;background:#fff;color:#222}
+    body.dark{background:#1a1a1a;color:#eee}
+    #mindmap{width:100%;height:100%}
+    .toolbar{
+      position:absolute;top:10px;left:10px;z-index:99;
+      background:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 2px 10px #0003;
+    }
+    body.dark .toolbar{background:#2d2d2d}
+    button{
+      padding:6px 12px;margin:4px;border:none;border-radius:6px;
+      background:#409eff;color:#fff;cursor:pointer;font-size:14px
+    }
+    button:nth-child(2){background:#67c23a}
+    button:nth-child(3){background:#e6a23c}
+    button:nth-child(4){background:#f56c6c}
+    button:nth-child(5){background:#909399}
+    button:nth-child(6){background:#722ed1}
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button id="theme">🌙 深色模式</button>
+    <button id="exportPng">导出PNG</button>
+    <button id="exportJson">导出JSON</button>
+    <button id="exportPdf">导出PDF</button>
+    <button id="exportMd">导出Markdown</button>
+    <button id="reset">重置模板</button>
+  </div>
+  <div id="mindmap"></div>
+
+  <script>
+    const { MindMap } = window.simpleMindMap;
+    let isDark = false;
+
+    const mind = new MindMap({
+      el: document.getElementById('mindmap'),
+      data: {
+        data: { text: "智思图思维导图" },
+        children: [
+          {data:{text:"计划规划"},children:[{data:{text:"目标"},{data:{text:"步骤"}}]},
+          {data:{text:"知识梳理"},children:[{data:{text:"要点"},{data:{text:"总结"}}]},
+          {data:{text:"灵感记录"}}
+        ]
+      },
+      readonly: false,
+      layout: "right",
+      theme: "primary"
+    });
+
+    document.getElementById('theme').onclick = () => {
+      isDark = !isDark;
+      document.body.classList.toggle('dark', isDark);
+      mind.setTheme(isDark ? "dark" : "primary");
+      document.getElementById('theme').innerText = isDark ? "☀️ 浅色模式" : "🌙 深色模式";
+    };
+
+    document.getElementById('exportPng').onclick = () => mind.exportPng();
+    document.getElementById('exportJson').onclick = () => mind.exportJson();
+
+    document.getElementById('exportPdf').onclick = () => {
+      html2pdf().set({margin:1,filename:'智思图.pdf'}).from(document.body).save();
+    };
+
+    document.getElementById('exportMd').onclick = () => {
+      const data = mind.getData();
+      let md = "# 智思图思维导图\n\n";
+      function walk(node, level=1){
+        md += "#".repeat(level) + " " + node.data.text + "\n\n";
+        node.children?.forEach(c=>walk(c,level+1));
+      }
+      walk(data);
+      const blob = new Blob([md],{type:"text/markdown"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "智思图.md";
+      a.click();
+    };
+
+    document.getElementById('reset').onclick = () => mind.setData({
+      data: { text: "智思图思维导图" },
+      children: [
+        {data:{text:"计划规划"},children:[{data:{text:"目标"},{data:{text:"步骤"}}]},
+        {data:{text:"知识梳理"},children:[{data:{text:"要点"},{data:{text:"总结"}}]},
+        {data:{text:"灵感记录"}}
+      ]
+    });
+  </script>
+</body>
+</html>
